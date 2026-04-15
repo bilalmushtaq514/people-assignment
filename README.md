@@ -132,7 +132,7 @@ terraform destroy
 
 ## Documentation
 
-- [REPORT.md](REPORT.md) -- Full assignment report with architecture diagrams
+- [docs/pipeline-steps.md](docs/pipeline-steps.md) -- CI/CD pipeline steps, trigger rules, and secrets reference
 - [docs/monitoring-setup.md](docs/monitoring-setup.md) -- Monitoring and logging details
 - [docs/security-practices.md](docs/security-practices.md) -- Security best practices implemented
 
