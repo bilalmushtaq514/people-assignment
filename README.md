@@ -24,8 +24,7 @@ aws s3 mb s3://people-assignment-tfstate --region us-east-1
 │   ├── modules/                # 8 reusable Terraform modules
 │   └── environments/           # dev / staging / prod configs
 ├── .github/workflows/          # CI/CD pipeline
-├── docs/                       # Monitoring & security documentation
-├── REPORT.md                   # Full assignment report
+├── docs/                       # CI/CD, Monitoring & security documentation
 └── README.md                   # This file
 ```
 
