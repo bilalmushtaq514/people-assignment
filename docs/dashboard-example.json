@@ -1,0 +1,107 @@
+{
+  "widgets": [
+    {
+      "type": "metric",
+      "x": 0,
+      "y": 0,
+      "width": 12,
+      "height": 6,
+      "properties": {
+        "title": "ECS CPU Utilization",
+        "metrics": [
+          ["AWS/ECS", "CPUUtilization", "ClusterName", "people-assignment-dev-cluster", "ServiceName", "people-assignment-dev-service"]
+        ],
+        "period": 300,
+        "stat": "Average",
+        "region": "us-east-1",
+        "view": "timeSeries"
+      }
+    },
+    {
+      "type": "metric",
+      "x": 12,
+      "y": 0,
+      "width": 12,
+      "height": 6,
+      "properties": {
+        "title": "ECS Memory Utilization",
+        "metrics": [
+          ["AWS/ECS", "MemoryUtilization", "ClusterName", "people-assignment-dev-cluster", "ServiceName", "people-assignment-dev-service"]
+        ],
+        "period": 300,
+        "stat": "Average",
+        "region": "us-east-1",
+        "view": "timeSeries"
+      }
+    },
+    {
+      "type": "metric",
+      "x": 0,
+      "y": 6,
+      "width": 8,
+      "height": 6,
+      "properties": {
+        "title": "ALB Request Count",
+        "metrics": [
+          ["AWS/ApplicationELB", "RequestCount", "LoadBalancer", "app/people-assignment-dev-alb/1234567890"]
+        ],
+        "period": 300,
+        "stat": "Sum",
+        "region": "us-east-1",
+        "view": "timeSeries"
+      }
+    },
+    {
+      "type": "metric",
+      "x": 8,
+      "y": 6,
+      "width": 8,
+      "height": 6,
+      "properties": {
+        "title": "ALB Target Response Time",
+        "metrics": [
+          ["AWS/ApplicationELB", "TargetResponseTime", "LoadBalancer", "app/people-assignment-dev-alb/1234567890"]
+        ],
+        "period": 300,
+        "stat": "Average",
+        "region": "us-east-1",
+        "view": "timeSeries"
+      }
+    },
+    {
+      "type": "metric",
+      "x": 16,
+      "y": 6,
+      "width": 8,
+      "height": 6,
+      "properties": {
+        "title": "ALB HTTP 5xx Errors",
+        "metrics": [
+          ["AWS/ApplicationELB", "HTTPCode_Target_5XX_Count", "LoadBalancer", "app/people-assignment-dev-alb/1234567890"],
+          ["AWS/ApplicationELB", "HTTPCode_ELB_5XX_Count", "LoadBalancer", "app/people-assignment-dev-alb/1234567890"]
+        ],
+        "period": 300,
+        "stat": "Sum",
+        "region": "us-east-1",
+        "view": "timeSeries"
+      }
+    },
+    {
+      "type": "metric",
+      "x": 0,
+      "y": 12,
+      "width": 12,
+      "height": 6,
+      "properties": {
+        "title": "Healthy Host Count",
+        "metrics": [
+          ["AWS/ApplicationELB", "HealthyHostCount", "TargetGroup", "targetgroup/people-assignment-dev-tg/1234567890", "LoadBalancer", "app/people-assignment-dev-alb/1234567890"]
+        ],
+        "period": 60,
+        "stat": "Average",
+        "region": "us-east-1",
+        "view": "timeSeries"
+      }
+    }
+  ]
+}
