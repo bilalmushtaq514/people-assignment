@@ -62,26 +62,25 @@ jobs:
         github.ref == 'refs/heads/staging')) ||
       (github.event_name == 'workflow_dispatch' &&
        github.event.inputs.confirm_prod_deploy == 'yes')
+    environment: >-
+      ${{
+        github.event_name == 'workflow_dispatch' && 'prod' ||
+        (github.ref == 'refs/heads/dev' && 'dev') ||
+        (github.ref == 'refs/heads/staging' && 'staging')
+      }}
 
     outputs:
-      image_tag: ${{ steps.meta.outputs.image_tag }}
-      environment: ${{ steps.meta.outputs.environment }}
+      image_tag: ${{ github.sha }}
+      environment: >-
+        ${{
+          github.event_name == 'workflow_dispatch' && 'prod' ||
+          (github.ref == 'refs/heads/dev' && 'dev') ||
+          (github.ref == 'refs/heads/staging' && 'staging')
+        }}
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-
-      - name: Determine environment
-        id: meta
-        run: |
-          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
-            ENV="prod"
-          else
-            ENV="${GITHUB_REF#refs/heads/}"
-          fi
-          echo "environment=$ENV" >> "$GITHUB_OUTPUT"
-          echo "image_tag=${{ github.sha }}" >> "$GITHUB_OUTPUT"
-          echo "Deploying to environment: $ENV"
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
@@ -98,7 +97,7 @@ jobs:
         env:
           ECR_REGISTRY: ${{ steps.ecr-login.outputs.registry }}
           ECR_REPOSITORY: ${{ secrets.ECR_REPOSITORY }}
-          IMAGE_TAG: ${{ steps.meta.outputs.image_tag }}
+          IMAGE_TAG: ${{ github.sha }}
         run: |
           docker build -t "$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" \
                        -t "$ECR_REGISTRY/$ECR_REPOSITORY:latest" \
