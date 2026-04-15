@@ -48,12 +48,10 @@ jobs:
         run: pytest app/tests/ -v --tb=short
 
   # -----------------------------------------------------------
-  # Job 2: Build and Push Docker Image
-  # Runs on push to dev/staging, or manual dispatch for prod.
-  # Skipped for main (CI-only) and pull requests.
+  # Job 2: Resolve which environment to target
   # -----------------------------------------------------------
-  build-and-push:
-    name: Build & Push
+  resolve-env:
+    name: Resolve Environment
     runs-on: ubuntu-latest
     needs: lint-and-test
     if: >-
@@ -64,13 +62,10 @@ jobs:
        github.event.inputs.confirm_prod_deploy == 'yes')
 
     outputs:
-      image_tag: ${{ steps.meta.outputs.image_tag }}
       environment: ${{ steps.meta.outputs.environment }}
+      image_tag: ${{ steps.meta.outputs.image_tag }}
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
       - name: Determine environment
         id: meta
         run: |
@@ -81,7 +76,21 @@ jobs:
           fi
           echo "environment=$ENV" >> "$GITHUB_OUTPUT"
           echo "image_tag=${{ github.sha }}" >> "$GITHUB_OUTPUT"
-          echo "Deploying to environment: $ENV"
+          echo "Resolved environment: $ENV"
+
+  # -----------------------------------------------------------
+  # Job 3: Build and Push Docker Image
+  # Now has access to environment secrets via the environment key.
+  # -----------------------------------------------------------
+  build-and-push:
+    name: Build & Push (${{ needs.resolve-env.outputs.environment }})
+    runs-on: ubuntu-latest
+    needs: resolve-env
+    environment: ${{ needs.resolve-env.outputs.environment }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
@@ -98,7 +107,7 @@ jobs:
         env:
           ECR_REGISTRY: ${{ steps.ecr-login.outputs.registry }}
           ECR_REPOSITORY: ${{ secrets.ECR_REPOSITORY }}
-          IMAGE_TAG: ${{ steps.meta.outputs.image_tag }}
+          IMAGE_TAG: ${{ needs.resolve-env.outputs.image_tag }}
         run: |
           docker build -t "$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" \
                        -t "$ECR_REGISTRY/$ECR_REPOSITORY:latest" \
@@ -107,15 +116,15 @@ jobs:
           docker push "$ECR_REGISTRY/$ECR_REPOSITORY:latest"
 
   # -----------------------------------------------------------
-  # Job 3: Deploy to Environment
+  # Job 4: Deploy to Environment
   # Uses GitHub Environments for per-env secrets and protection.
   # The prod environment should have a required-reviewer rule.
   # -----------------------------------------------------------
   deploy:
-    name: Deploy to ${{ needs.build-and-push.outputs.environment }}
+    name: Deploy to ${{ needs.resolve-env.outputs.environment }}
     runs-on: ubuntu-latest
-    needs: build-and-push
-    environment: ${{ needs.build-and-push.outputs.environment }}
+    needs: [resolve-env, build-and-push]
+    environment: ${{ needs.resolve-env.outputs.environment }}
 
     steps:
       - name: Configure AWS credentials
